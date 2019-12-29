@@ -19,9 +19,11 @@ def _jflex_impl(ctx):
 
     # TODO(regisd): Add support for JFlex options.
     maybe_skel = [ctx.file.skeleton] if ctx.file.skeleton else []
-    cmd_maybe_skel = ["-skel", ctx.file.skeleton.path] if ctx.file.skeleton else []
+    arg_maybe_skel = ["-skel", ctx.file.skeleton.path] if ctx.file.skeleton else []
+    arg_maybe_jlex = ["--jlex"] if ctx.attr.jlex else []
     arguments = (
-        cmd_maybe_skel +
+        arg_maybe_skel +
+        arg_maybe_jlex +
         # Option to specify output directory
         ["-d", output_dir] +
         # Input files
@@ -29,7 +31,7 @@ def _jflex_impl(ctx):
     )
     ctx.actions.run(
         mnemonic = "jflex",
-        inputs = ctx.files.srcs + maybe_skel,
+        inputs = ctx.files.srcs + ctx.files.data + maybe_skel,
         outputs = ctx.outputs.outputs,
         executable = ctx.executable.jflex_bin,
         arguments = arguments,
@@ -44,6 +46,13 @@ jflex = rule(
             allow_files = True,
             mandatory = True,
             doc = "a list of grammar specifications",
+        ),
+        "data": attr.label_list(
+            allow_files = True,
+            doc = "extra files to pass to the rule, e.g. included grammar specs",
+        ),
+        "jlex": attr.bool(
+            doc = "JLex compatibility increaed. In particular, this changes how caseless behaves.",
         ),
         "skeleton": attr.label(
             allow_single_file = True,
