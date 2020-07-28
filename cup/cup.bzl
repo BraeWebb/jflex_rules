@@ -22,6 +22,8 @@ def _cup_impl(ctx):
     args.extend(["-destdir", output_dir])
     if ctx.attr.interface:
         args.append("-interface")
+    if ctx.attr.locations:
+        args.append("-locations")
     args.extend([ctx.file.src.path])
 
     # TODO(regisd): Add support for CUP options.
@@ -64,6 +66,9 @@ cup = rule(
         "interface": attr.bool(
             doc = "Outputs the symbol constant code as an interface rather than as a class.",
         ),
+        "locations": attr.bool(
+            doc = "Generate handles xleft/xright for symbol positions in actions"
+        )
     },
     output_to_genfiles = True,  # JFlex generates java files, not bin files
 )
